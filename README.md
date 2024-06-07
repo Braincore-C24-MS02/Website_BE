@@ -33,7 +33,7 @@ example json-response :
 
 ```
 
-# 3  Send Driver & Vehicle Data (Hardware to Firebase)
+# 3. Send Driver & Vehicle Data (Hardware to Firebase)
 
 example json-response :
 
