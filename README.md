@@ -1,6 +1,9 @@
 # Website_BE
 
 # 1. Send Activity Status (Test)
+
+example json-response :
+
 ```json
 {
   "auth_key": "<auth_key>",
@@ -19,6 +22,8 @@
 
 # 2. Request Activity Status (Test)
 
+example json-response :
+
 ```json
 {
   "device_id": "<device_id>",
@@ -29,6 +34,8 @@
 ```
 
 # 3  Send Driver & Vehicle Data (Hardware to Firebase)
+
+example json-response :
 
 ```json
 {
@@ -43,6 +50,9 @@
 ```
 
 # 4. Upload Driver Frame (Hardware to Firebase)
+
+example json-response :
+
 ```json
 {
   "frame_id": "<frame_id>",
@@ -56,28 +66,41 @@
 ```
 
 # 5. Append Confirmed Anomaly Video (Cloud Model to Firestore)
+**Used within the “Append Confirmed Anomaly Video (Cloud Model to Firestore)”**
+
+Method: POST
+
+url :
+ ```
+api/append-confirmed-anomaly-video
+```
+
+example json-response :
 
 ```json
 {
-  "video_url": "<URL of the confirmed anomaly video>",
-  "model": "<Name of the cloud model that detected the anomaly>",
-  "timestamp": "<Timestamp of the anomaly detection>",
-  "anomaly_details": { // Optional: Additional details about the anomaly
-    "type": "<Type of anomaly (e.g., drowsiness, distraction)>",
-    "confidence": <Confidence score for anomaly detection (0.0 to 1.0)>,
-    "bounding_box": { // Optional: Bounding box of the anomaly in the video
-      "x": <X-coordinate>,
-      "y": <Y-coordinate>,
-      "width": <Width>,
-      "height": <Height>
-    }
+  "status": 200,
+  "anomaly_detail": {// Optional: Additional details about the anomaly
+   "Type": // <Type of anomaly (e.g., drowsiness, distraction)>
   }
+  "message": "Confirmed anomaly video appended successfully."
 }
+
 ```
 
 # 6. Append Confirmed Anomaly Data (Cloud Model to MySQL)
+**Used within the “Append Confirmed Anomaly Data (Cloud Model to MySQL)”**
 
-```json 
+Method: POST
+
+url:
+```
+api/append-confirmed-anomaly-data
+```
+
+example json-response :
+
+```json
 {
   "timestamp": "<Timestamp of the anomaly detection>",
   "model": "<Name of the cloud model that detected the anomaly>",
@@ -95,15 +118,110 @@
   }
 }
 ```
-
 # 7. Request Confirmed Anomaly Video (Firestore to Website)
-```json 
+Method : POST
+
+url : 
+
+```
+api/req-confirmed-anomaly-video
+```
+
+example json-response :
+
+```json
 {
-  "deletions": [
-    10,
-    11,
-    40
-  ],
-  "version": "5"
+  "status": 200,
+  "data": {
+    "video_url": "https://example.com/confirmed_anomaly_video.mp4",
+    "timestamp": "2024-06-07T12:00:00Z",
+    "location": "Mine Site A"
+  }
 }
+```
+
+# 8. Request Confirmed Anomaly Data (MySQL to Website)
+
+Method : POST
+
+url :
+```
+api/req-confirmed-anomaly-data
+```
+
+example json-response :
+
+```json
+{
+  "status": 200,
+  "data": [
+    {
+      "anomaly_id": "123456",
+      "timestamp": "2024-06-07T12:00:00Z",
+      "location": "Mine Site C",
+      "type": "drowsiness",
+    },
+    {
+      "anomaly_id": "789012",
+      "timestamp": "2024-06-07T13:00:00Z",
+      "location": "Mine Site A",
+      "type": "Gas Leak",
+    }
+  ]
+}
+
+```
+
+# 9. Append Activity Data (Hardware to MySQL)
+
+Method : POST
+
+url
+```
+api/append-activity-data-hardware
+```
+
+example json-response :
+
+```json
+{
+  "status": 200,
+  "message": "Activity data appended successfully."
+}
+```
+
+# 10. Request Activity Data (MySQL to Website)
+
+Method : POST
+
+url
+```
+api/append-activity-data-web
+```
+
+example json-response :
+
+```json
+{
+  "status": 200,
+  "data": [
+    {
+      "activity_id": "1",
+      "timestamp": "2024-06-07T12:00:00Z",
+      "driver_id": "123",
+      "activity_type": "Speeding",
+      "location": "Mine Site A",
+      "speed": 85
+    },
+    {
+      "activity_id": "2",
+      "timestamp": "2024-06-07T13:00:00Z",
+      "driver_id": "456",
+      "activity_type": "Smoking",
+      "location": "Mine Site B",
+      "speed": 20
+    }
+  ]
+}
+
 ```
