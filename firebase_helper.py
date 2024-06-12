@@ -1,10 +1,7 @@
-import os
-
-import dotenv
 import firebase_admin
-from firebase_admin import credentials, firestore, storage
+import dotenv, os
+from firebase_admin import App, credentials, firestore, initialize_app, storage
 from misc_helper import load_firebase_credentials
-
 
 def init_firebase_app(env_file):
     try:
@@ -63,3 +60,23 @@ def add_driver_frame(bytes, driver_id, timestamp, storage=None):
     except Exception as e:
         print(f"Error: {e}")
         return {"message": "Frame not added successfully"}
+    
+
+def find_user(data, db=None):
+    if db is None:
+        db = init_firestore('.env')
+    # Get the users collection
+    users_col = db.collection('users')
+
+    if 'email' in data:
+        # Query documents with matching email and password
+        docs = users_col.where('email', '==', data['email']).stream()
+
+        # Check for matching documents
+        for doc in docs:
+            user_data = doc.to_dict()
+            return user_data  # Return the first matching user data
+
+    # No matching user found
+    return None
+
