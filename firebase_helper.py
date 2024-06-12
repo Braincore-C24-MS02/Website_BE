@@ -1,12 +1,15 @@
+import os
+
+import dotenv
 import firebase_admin
-import dotenv, os
-from firebase_admin import App, credentials, firestore, initialize_app, storage
+from firebase_admin import credentials, firestore, storage
 from misc_helper import load_firebase_credentials
+
 
 def init_firebase_app(env_file):
     try:
         app = firebase_admin.get_app()
-    except ValueError as e:
+    except ValueError:
         dotenv.load_dotenv(dotenv_path=env_file)
 
         # Initialize the configs for the Firebase Admin SDK
@@ -25,27 +28,27 @@ def init_firebase_app(env_file):
         app = firebase_admin.initialize_app(credential=cred, options=firebase_config)
     return app
 
-def init_firestore(env_file, app = None):
+def init_firestore(env_file, app=None):
     if app is None:
         app = init_firebase_app(env_file)
     db = firestore.client(app)
     return db
 
-def init_storage(env_file, app = None):
+def init_storage(env_file, app=None):
     if app is None:
         app = init_firebase_app(env_file)
         print("App type: ", type(app))
     storage_instance = storage.bucket(name="bangkit-capstone-dms.appspot.com", app=app)
     return storage_instance
 
-def add_test_data(collection_name, data, db = None):
+def add_test_data(collection_name, data, db=None):
     if db is None:
         db = init_firestore('.env')
     # Add a new document with a generated ID
     db.collection(collection_name).add(data)
     print("Document added successfully")
 
-def add_driver_frame(bytes, driver_id, timestamp, storage = None):
+def add_driver_frame(bytes, driver_id, timestamp, storage=None):
     if storage is None:
         print("Storage initialized")
         storage = init_storage('.env')
