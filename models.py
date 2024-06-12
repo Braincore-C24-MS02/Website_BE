@@ -2,14 +2,16 @@ from pydantic import BaseModel
 
 
 class SignUpSchema(BaseModel):
+    name: str  # Menambahkan bidang name
     email: str
     password: str
     
     class Config:
         json_schema_extra ={
             "example":{
-                "email":"sample@email.com",
-                "password":"pw12345"
+                "name": "John Doe",  # Contoh data untuk bidang name
+                "email": "sample@email.com",
+                "password": "pw12345"
             }
         }
         
@@ -20,7 +22,7 @@ class LoginSchema(BaseModel):
     class Config:
         json_schema_extra ={
             "example":{
-                "email":"sample@email.com",
-                "password":"pw12345"
+                "email": "sample@email.com",
+                "password": "pw12345"
             }
         }
