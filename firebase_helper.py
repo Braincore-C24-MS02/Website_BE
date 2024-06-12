@@ -20,7 +20,6 @@ def init_firebase_app(env_file):
         firebase_config['measurementId'] = os.getenv('firebase_measurementId')
         firebase_config['serviceAccount'] = "firestore-credentials.json"
         cred_json = load_firebase_credentials(env_file)
-        print(cred_json)
 
         cred = credentials.Certificate(cred_json)
         app = firebase_admin.initialize_app(credential=cred, options=firebase_config)
