@@ -13,6 +13,7 @@ from firebase_admin import auth, credentials, firestore
 from firebase_helper import init_firebase_app, init_firestore, init_storage
 from misc_helper import parse_datetime
 from models import LoginSchema, SignUpSchema
+from pydantic import BaseModel
 
 # Muat variabel lingkungan dari .env file
 load_dotenv()
@@ -31,6 +32,30 @@ app.add_middleware(
     allow_methods=["GET", "POST", "PUT", "DELETE"],
     allow_headers=["*"],
 )
+
+users_db = {
+    "user1": {
+        "email": "user1@example.com",
+        "password": "password123",
+        "name": "User One"
+    },
+    "user2": {
+        "email": "user2@example.com",
+        "password": "password456",
+        "name": "User Two"
+    }
+}
+
+class SignUpSchema(BaseModel):
+    email: str
+    password: str
+    name: str
+
+class LoginSchema(BaseModel):
+    email: str
+    password: str
+
+
 
 
 # Inisialisasi Firebase Admin SDK
@@ -73,66 +98,52 @@ db = init_firestore(env_file='.env', app=firebase_app)
 async def root():
     return {"message": "Website_BE is running"}
 
-@app.get("/")
-async def root():
-    return {"message": "Website_BE is running"}
 
 @app.post('/Signup')
 async def create_account(user_data: SignUpSchema):
     email = user_data.email
     password = user_data.password
-    name = user_data.name  
+    name = user_data.name
 
-    try:
-        
-        user = auth.create_user(
-            email=email,
-            password=password,
-            display_name=name  
-        )
-        
-        user_data_dict = {
-            "name": name,  
-            "email": email,
-            "created_at": firestore.SERVER_TIMESTAMP
-        }
-        db.collection('users').document(user.uid).set(user_data_dict)
+    # Cek apakah email sudah ada dalam database hardcode
+    for user in users_db.values():
+        if user["email"] == email:
+            raise HTTPException(
+                status_code=400,
+                detail="Email sudah digunakan!"
+            )
 
-        return JSONResponse(
-            content={"message": "User account created successfully!"},
-            status_code=201
-        )
+    # Tambahkan pengguna baru ke database hardcode
+    new_user_id = f"user{len(users_db) + 1}"
+    users_db[new_user_id] = {
+        "email": email,
+        "password": password,
+        "name": name
+    }
 
-    except auth.EmailAlreadyExistsError:
-        raise HTTPException(
-            status_code=400,
-            detail="Email already used!"
-        )
+    return JSONResponse(
+        content={"message": "Akun pengguna berhasil dibuat!"},
+        status_code=201
+    )
 
 @app.post('/Login')
 async def create_access_token(user_data: LoginSchema):
     email = user_data.email
     password = user_data.password
 
-    try:
-        user = firebase.auth().sign_in_with_email_and_password(
-            email=email,
-            password=password
-        )
+    # Verifikasi kredensial dari database hardcode
+    for user in users_db.values():
+        if user["email"] == email and user["password"] == password:
+            return JSONResponse(
+                content={
+                    "message": "Login berhasil!"
+                }, status_code=200
+            )
 
-        token = user['idToken']
-
-        return JSONResponse(
-            content={
-                "token": token
-            }, status_code=200
-        )
-
-    except:
-        raise HTTPException(
-            status_code=400,
-            detail="Invalid Credentials!"
-        )
+    raise HTTPException(
+        status_code=400,
+        detail="Kredensial tidak valid!"
+    )
 
 @app.options("/Login")
 async def login_options():
